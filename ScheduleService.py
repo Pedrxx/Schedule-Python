@@ -14,8 +14,8 @@ def gen_log(retorno):
 def executar_query():
     try:
         # Conectar ao banco de dados Postgres
-        conn = psycopg2.connect(database="postgres", user="postgres", password="powerbi", host="127.0.0.1", port="5432")
-        conn2 = psycopg2.connect(database="datawarehouse", user="postgres", password="powerbi", host="127.0.0.1", port="5432")
+        conn = psycopg2.connect(database="postgres", user="postgres", password="senha", host="127.0.0.1", port="5432")
+        conn2 = psycopg2.connect(database="postgres", user="postgres", password="senha", host="127.0.0.1", port="5432")
 
         cur = conn.cursor()
         cur2 = conn2.cursor()
@@ -24,21 +24,27 @@ def executar_query():
 
         table_len = cur.fetchone()[0]
 
+        cur.execute("select jstid from pgagent.pga_jobstep where jstenabled = true order by jstid")    
+        ids = []
+        for row in cur.fetchall():
+            ids.append(row[0])
+
         i = int(0)
 
         agora = datetime.datetime.now()
         data_hora_atual = str(agora.strftime("%d/%m/%Y %H:%M:%S"))
 
         while i < table_len:
+
+            print(ids[i])
             
-            id_table = i + 1
-            cur.execute("select jstcode from pgagent.pga_jobstep where jstid = %s", (str(id_table,)))
+            cur.execute("select jstcode from pgagent.pga_jobstep where jstid = %s", (str(ids[i],)))
 
             query = cur.fetchone()[0]
             cur2.execute(query);
             msg = cur2.statusmessage
             conn2.commit()
-            cur.execute("select jstname from pgagent.pga_jobstep where jstid = %s", (str(id_table,)))
+            cur.execute("select jstname from pgagent.pga_jobstep where jstid = %s", (str(ids[i],)))
             step_exec = cur.fetchone()[0]
             exec_log = f"[{data_hora_atual}] {msg} | executado com sucesso | {step_exec} "
             print(exec_log)
