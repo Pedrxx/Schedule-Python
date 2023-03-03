@@ -14,31 +14,30 @@ def gen_log(retorno):
 def executar_query():
     try:
         # Conectar ao banco de dados Postgres
-        conn = psycopg2.connect(database="postgres", user="postgres", password="senha", host="localhost", port="5432")
-#         conn2 = psycopg2.connect(database="postgres", user="postgres", password="senha", host="localhost", port="5432")
+        conn = psycopg2.connect(database="postgres", user="postgres", password="powerbi", host="127.0.0.1", port="5432")
+        conn2 = psycopg2.connect(database="datawarehouse", user="postgres", password="powerbi", host="127.0.0.1", port="5432")
 
         cur = conn.cursor()
-#         cur2 = conn2.cursor()
+        cur2 = conn2.cursor()
 
-        cur.execute("select * from pgagent.pga_jobstep")    
+        cur.execute("select count(jstid) from pgagent.pga_jobstep where jstenabled = true")    
 
         table_len = cur.fetchone()[0]
 
-        max_table = table_len + 1;
         i = int(0)
 
         agora = datetime.datetime.now()
         data_hora_atual = str(agora.strftime("%d/%m/%Y %H:%M:%S"))
 
-        while i < max_table:
+        while i < table_len:
             
             id_table = i + 1
             cur.execute("select jstcode from pgagent.pga_jobstep where jstid = %s", (str(id_table,)))
 
             query = cur.fetchone()[0]
-            cur.execute(query);
-            msg = cur.statusmessage
-            conn.commit()
+            cur2.execute(query);
+            msg = cur2.statusmessage
+            conn2.commit()
             cur.execute("select jstname from pgagent.pga_jobstep where jstid = %s", (str(id_table,)))
             step_exec = cur.fetchone()[0]
             exec_log = f"[{data_hora_atual}] {msg} | executado com sucesso | {step_exec} "
@@ -56,9 +55,9 @@ def executar_query():
         # Fechar a conexão com o banco de dados
         if conn:
             cur.close()
-#             cur2.close()
+            cur2.close()
             conn.close()
-#             conn2.close()
+            conn2.close()
 
 inicio_schedule = (f"""
     \n
