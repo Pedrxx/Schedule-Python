@@ -8,7 +8,7 @@ Foi utilizado o PyInstaller para criar o executável e o NSSM para poder tornar 
 C:/Schedule/pyinstaller ScheduleService.py
 
 C:/Schedule/NSSM install
-> Ao abrir, escolha o executável no campo  "Aplication PATH"
-> E defina o "Service Name"
-> e "Install Service"
+- Ao abrir, escolha o executável no campo  "Aplication PATH"
+- E defina o "Service Name"
+- e "Install Service"
 
